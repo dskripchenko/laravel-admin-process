@@ -37,13 +37,6 @@ jobs:
           extensions: mbstring, dom, fileinfo, pdo_sqlite
           coverage: none
 
-      # Local development resolves the engine from sibling directories; CI
-      # takes the published packages.
-      - name: Use the published engine
-        run: |
-          composer config --unset repositories
-          composer require "dskripchenko/laravel-process-engine:^1.0" --no-interaction --no-update
-
       - name: Pin Testbench
         run: composer require "orchestra/testbench:${{ matrix.testbench }}" --dev --no-update --no-interaction
 
