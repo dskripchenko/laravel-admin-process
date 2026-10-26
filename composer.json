@@ -1,0 +1,66 @@
+{
+    "name": "dskripchenko/laravel-admin-process",
+    "description": "Process-engine screens for dskripchenko/laravel-admin: instances, live flow diagram, journal, incidents and operator actions.",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "admin",
+        "workflow",
+        "state-machine",
+        "process-engine",
+        "dskripchenko"
+    ],
+    "homepage": "https://github.com/dskripchenko/laravel-admin-process",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Denis Skripchenko",
+            "email": "denskrp90@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/dskripchenko/laravel-admin-process/issues",
+        "source": "https://github.com/dskripchenko/laravel-admin-process"
+    },
+    "require": {
+        "php": "^8.2",
+        "dskripchenko/laravel-admin": "^1.59",
+        "dskripchenko/laravel-process-engine": "@dev"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0 || ^10.0 || ^11.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.0 || ^12.0"
+    },
+    "repositories": [
+        {"type": "path", "url": "../laravel-process-engine", "options": {"symlink": true}},
+        {"type": "path", "url": "../process-engine", "options": {"symlink": true}}
+    ],
+    "autoload": {
+        "psr-4": {
+            "Dskripchenko\\LaravelAdminProcess\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Dskripchenko\\LaravelAdminProcess\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Dskripchenko\\LaravelAdminProcess\\AdminProcessServiceProvider"
+            ]
+        },
+        "branch-alias": {
+            "dev-main": "1.x-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
