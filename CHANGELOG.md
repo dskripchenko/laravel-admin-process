@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project
 adheres to [Semantic Versioning](https://semver.org/).
 
+
+## [Unreleased]
+
+### Fixed
+- **The instance page took another screen's `?id=1` for an instance id.** The
+  panel describes every screen while it builds its manifest, with the query
+  string of the page that is open; the id reached PostgreSQL's uuid column,
+  which rejected it — and inside a host's request transaction that aborted
+  every later query. Only UUIDs are taken for an instance id now.
+
 ## [1.0.0] - 2026-10-26
 
 ### Added
