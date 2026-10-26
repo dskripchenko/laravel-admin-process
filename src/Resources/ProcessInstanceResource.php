@@ -33,7 +33,7 @@ use Illuminate\Database\Eloquent\Model;
  *   - admin.process.instances.view
  *   - admin.process.operate — suspend, resume, cancel
  */
-final class ProcessInstanceResource extends Resource
+class ProcessInstanceResource extends Resource
 {
     public static string $model = ProcessInstance::class;
 

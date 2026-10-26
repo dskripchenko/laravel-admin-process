@@ -42,7 +42,7 @@ use Dskripchenko\ProcessEngine\Store\JournalRecord;
  * refuses it to a user without that permission (a screen method no action
  * names would be open to anyone who sees the page).
  */
-final class ProcessInstanceScreen extends Screen
+class ProcessInstanceScreen extends Screen
 {
     /** @var array<string, InstanceView|null> */
     private array $views = [];

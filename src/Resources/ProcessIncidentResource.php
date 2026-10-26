@@ -30,7 +30,7 @@ use Illuminate\Database\Eloquent\Model;
  *   - admin.process.incidents.view
  *   - admin.process.operate — resolve an incident
  */
-final class ProcessIncidentResource extends Resource
+class ProcessIncidentResource extends Resource
 {
     public static string $model = ProcessIncident::class;
 
