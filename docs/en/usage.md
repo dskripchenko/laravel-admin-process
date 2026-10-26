@@ -81,9 +81,7 @@ operator method of the page is refused to a viewer.
 
 ## Customizing
 
-The classes are regular laravel-admin classes; extend them in the
-application and register your own instead:
-
-- `Resources\ProcessInstanceResource`, `Resources\ProcessIncidentResource`
-- `Screens\ProcessInstanceScreen`
-- `Widgets\ProcessOverviewWidget` (its `permission` can be narrowed)
+The dashboard card is a regular widget: narrow who sees it with
+`ProcessOverviewWidget::make()->permission(...)` when you place it on a
+dashboard of your own. The refresh intervals and the journal length are in
+the config.
