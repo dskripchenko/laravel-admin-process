@@ -14,7 +14,7 @@ composer require dskripchenko/laravel-admin-process
 
 The pack depends on `dskripchenko/laravel-process-engine`; if the engine is
 new to the application, publish its config and run its migrations
-(see the engine's installation guide):
+(see [the engine's installation guide](https://github.com/dskripchenko/laravel-process-engine/blob/main/docs/en/installation.md)):
 
 ```bash
 php artisan vendor:publish --tag=process-engine-config
