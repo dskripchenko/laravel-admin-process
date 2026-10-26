@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Dskripchenko\LaravelAdminProcess\Support;
 
+use Dskripchenko\LaravelAdmin\Panel\Panels;
 use Dskripchenko\LaravelAdmin\Resource\ActionFailedException;
 use Dskripchenko\ProcessEngine\Actor;
 use Dskripchenko\ProcessEngine\Engine;
 use Dskripchenko\ProcessEngine\Store\InboxRecord;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Runs an operator action on behalf of the signed-in admin.
@@ -24,7 +26,13 @@ final class Operator
 {
     public static function actor(): Actor
     {
-        $user = auth()->user();
+        // The panel signs admins in with a guard of its own, not the
+        // application's default one.
+        try {
+            $user = Auth::guard(Panels::currentGuard())->user();
+        } catch (\Throwable) {
+            $user = null;
+        }
         if (! $user instanceof Authenticatable) {
             return Actor::system('admin');
         }

@@ -44,9 +44,24 @@ final class InstanceResourceTest extends TestCase
         $this->assertSame('manual.suspend', $last->type);
         $this->assertSame('Client asked', $last->reason);
         $this->assertSame('Olga', $last->actor['display'] ?? null);
+        $this->assertSame('operator', $last->actor['type'] ?? null);
 
         $this->postResourceAction('process-instances', 'action', ['key' => 'resume', 'ids' => [$id], 'payload' => ['reason' => 'Back']])->assertOk();
         $this->assertSame('running', $this->engine()->get($id)->status());
+    }
+
+    public function test_the_journal_names_the_admin_when_the_default_guard_is_another(): void
+    {
+        // Over HTTP the panel authenticates on its own guard; the
+        // application's default guard knows nobody.
+        $this->actingAsAdmin(['name' => 'Olga'], [Permissions::VIEW, Permissions::OPERATE]);
+        $this->app['auth']->shouldUse('web');
+        $id = $this->order();
+
+        $this->postResourceAction('process-instances', 'action', ['key' => 'suspend', 'ids' => [$id], 'payload' => ['reason' => 'Hold']])->assertOk();
+
+        $journal = $this->engine()->get($id)->journal();
+        $this->assertSame(['type' => 'operator', 'display' => 'Olga'], array_intersect_key((array) end($journal)->actor, ['type' => 1, 'display' => 1]));
     }
 
     public function test_an_action_without_a_reason_is_refused(): void
