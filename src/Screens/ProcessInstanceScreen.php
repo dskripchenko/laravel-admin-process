@@ -27,6 +27,7 @@ use Dskripchenko\ProcessEngine\Definition\StateType;
 use Dskripchenko\ProcessEngine\Engine;
 use Dskripchenko\ProcessEngine\Export\FlowExporter;
 use Dskripchenko\ProcessEngine\Query\InstanceView;
+use Dskripchenko\ProcessEngine\Store\BatchRecord;
 use Dskripchenko\ProcessEngine\Store\EffectRecord;
 use Dskripchenko\ProcessEngine\Store\InboxRecord;
 use Dskripchenko\ProcessEngine\Store\IncidentRecord;
@@ -127,6 +128,16 @@ class ProcessInstanceScreen extends Screen
                 'created_at' => $i->createdAt->format(DATE_ATOM),
                 'resolution' => $i->resolution,
             ], $view->incidents(null)),
+            'batches' => array_map(fn (BatchRecord $b) => [
+                'id' => $b->id,
+                'state' => $b->state,
+                'status' => $b->status,
+                'progress' => self::progress($b),
+                'error' => $b->error === null ? null : ($b->error['code'] ?? '').': '.($b->error['message'] ?? ''),
+                'created_at' => $b->createdAt?->format(DATE_ATOM),
+                'finished_at' => $b->finishedAt?->format(DATE_ATOM),
+            ], array_reverse($view->batches())),
+            'batch_items' => self::problemItems($view),
             'timers' => array_map(fn ($t) => [
                 'event' => $t->event,
                 'fire_at' => $t->fireAt->format(DATE_ATOM),
@@ -200,6 +211,23 @@ class ProcessInstanceScreen extends Screen
                     Layout::code((string) json_encode($view->contextArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'json')
                         ->maxHeight(600)->wrap(),
                 ],
+                __('Пакеты') => [Layout::infolist([
+                    RepeatableEntry::make('batches')->label(__('Пакетные этапы'))->entries([
+                        TextEntry::make('state')->label(__('Этап')),
+                        BadgeEntry::make('status')->label(__('Статус'))->colors(['running' => 'info', 'done' => 'success', 'failed' => 'danger', 'cancelled' => 'secondary'])->labels(Labels::batchStatuses()),
+                        TextEntry::make('progress')->label(__('Элементы')),
+                        TextEntry::make('error')->label(__('Ошибка')),
+                        TextEntry::make('created_at')->label(__('Начат'))->asDateTime(),
+                        TextEntry::make('finished_at')->label(__('Закончен'))->asDateTime(),
+                    ]),
+                    RepeatableEntry::make('batch_items')->label(__('Элементы с ошибкой и отложенные (последние 200)'))->entries([
+                        TextEntry::make('state')->label(__('Этап')),
+                        TextEntry::make('key')->label(__('Элемент'))->copyable(),
+                        TextEntry::make('status')->label(__('Статус')),
+                        TextEntry::make('attempts')->label(__('Попыток')),
+                        TextEntry::make('reason')->label(__('Причина')),
+                    ]),
+                ])],
                 __('Эффекты') => [Layout::infolist([
                     RepeatableEntry::make('effects')->label(__('Эффекты'))->entries([
                         TextEntry::make('class')->label(__('Класс')),
@@ -252,6 +280,17 @@ class ProcessInstanceScreen extends Screen
                 ->permission(Permissions::OPERATE)->fields([
                     $reason(),
                     Switcher::make('compensate')->title(__('Сначала компенсировать выполненные шаги')),
+                ]),
+            ModalAction::make(__('Повторить элементы пакета'))->withName('retry_batch')->method('retryBatch')
+                ->permission(Permissions::OPERATE)->fields([
+                    Select::make('batch')->title(__('Пакет'))->options($this->batchOptions())->required(),
+                    Select::make('statuses')->title(__('Какие элементы'))->options(['failed' => __('с ошибкой'), 'deferred' => __('отложенные'), 'not_found' => __('не найденные')])->multiple()->default(['failed', 'deferred']),
+                    $reason(),
+                ]),
+            ModalAction::make(__('Пропустить остаток пакета'))->withName('skip_batch')->method('skipBatch')
+                ->permission(Permissions::OPERATE)->fields([
+                    Select::make('batch')->title(__('Пакет'))->options($this->batchOptions())->required(),
+                    $reason(),
                 ]),
             ModalAction::make(__('Повторить эффект'))->withName('retry_effect')->method('retryEffect')
                 ->permission(Permissions::OPERATE)->fields([
@@ -381,6 +420,23 @@ class ProcessInstanceScreen extends Screen
     }
 
     /** @param array<string, mixed> $state */
+    public function retryBatch(array $state): array
+    {
+        $batch = $this->batchOf($state);
+        $statuses = array_values(array_map('strval', (array) ($state['statuses'] ?? ['failed', 'deferred']))) ?: ['failed', 'deferred'];
+
+        return $this->operate($state, 'retry_batch', fn (Engine $e, string $id, Actor $by, string $r) => $e->retryBatchItems($id, $batch, $by, $r, $statuses));
+    }
+
+    /** @param array<string, mixed> $state */
+    public function skipBatch(array $state): array
+    {
+        $batch = $this->batchOf($state);
+
+        return $this->operate($state, 'skip_batch', fn (Engine $e, string $id, Actor $by, string $r) => $e->skipBatch($id, $batch, $by, $r));
+    }
+
+    /** @param array<string, mixed> $state */
     public function retryEffect(array $state): array
     {
         $effect = $this->effectOf($state);
@@ -506,6 +562,75 @@ class ProcessInstanceScreen extends Screen
         }
 
         return $effect;
+    }
+
+    /**
+     * @param  array<string, mixed>  $state
+     */
+    private function batchOf(array $state): string
+    {
+        $batch = (string) ($state['batch'] ?? '');
+        $view = $this->view($this->instanceId($state));
+        foreach ($view?->batches() ?? [] as $record) {
+            if ($record->id === $batch && $record->isRunning()) {
+                return $batch;
+            }
+        }
+        throw new ActionFailedException(__('Выберите идущий пакет этого экземпляра'));
+    }
+
+    /**
+     * The running batches of the instance, for the operator actions.
+     *
+     * @return array<string, string>
+     */
+    private function batchOptions(): array
+    {
+        $options = [];
+        foreach ($this->view()?->batches() ?? [] as $batch) {
+            if ($batch->isRunning()) {
+                $options[$batch->id] = $batch->state.' · '.self::progress($batch);
+            }
+        }
+
+        return $options;
+    }
+
+    private static function progress(BatchRecord $batch): string
+    {
+        $s = $batch->summary();
+        $finished = $s['done'] + $s['not_found'] + $s['failed'] + $s['deferred'] + $s['skipped'];
+        $parts = [__('готово :n', ['n' => $s['done']])];
+        foreach (['not_found' => 'не найдено :n', 'failed' => 'с ошибкой :n', 'deferred' => 'отложено :n', 'skipped' => 'пропущено :n'] as $key => $label) {
+            if ($s[$key] > 0) {
+                $parts[] = __($label, ['n' => $s[$key]]);
+            }
+        }
+
+        return $finished.' / '.($batch->total ?? $s['total']).' — '.implode(', ', $parts);
+    }
+
+    /**
+     * Failed and deferred elements of the instance's batches, newest batch first.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private static function problemItems(InstanceView $view): array
+    {
+        $engine = app(Engine::class);
+        $rows = [];
+        foreach (array_reverse($view->batches()) as $batch) {
+            foreach (['failed', 'deferred'] as $status) {
+                foreach ($engine->batchItems($batch->id, $status, 200 - count($rows)) as $item) {
+                    $rows[] = ['state' => $batch->state, 'key' => $item->key, 'status' => $item->status, 'attempts' => $item->attempts, 'reason' => $item->reason];
+                }
+                if (count($rows) >= 200) {
+                    return $rows;
+                }
+            }
+        }
+
+        return $rows;
     }
 
     private function assertState(string $instanceId, string $state): void
