@@ -41,6 +41,22 @@ final class InstanceScreenTest extends TestCase
         $this->assertFalse($response->json('payload.state.found'));
     }
 
+    public function test_another_screens_id_never_reaches_the_database(): void
+    {
+        $this->actingAsAdmin(permissions: [Permissions::VIEW]);
+        $instanceQueries = [];
+        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$instanceQueries): void {
+            if (str_contains($query->sql, 'pe_instances') && in_array('1', array_map('strval', $query->bindings), true)) {
+                $instanceQueries[] = $query->sql;
+            }
+        });
+
+        $response = $this->getJson('/api/admin/process-instance/state?id=1')->assertOk();
+
+        $this->assertFalse($response->json('payload.state.found'));
+        $this->assertSame([], $instanceQueries);
+    }
+
     public function test_the_page_needs_the_view_permission(): void
     {
         $this->actingAsAdmin(permissions: [Permissions::INCIDENTS_VIEW]);

@@ -537,7 +537,11 @@ class ProcessInstanceScreen extends Screen
     {
         $request = request();
         foreach ([$request->query('id'), $request->input('payload.instance_id'), $request->input('parameters.0.instance')] as $candidate) {
-            if (is_string($candidate) && $candidate !== '') {
+            // Instance ids are UUIDs. The panel describes every screen while it
+            // builds its manifest, with the query string of whatever page is
+            // open — another screen's `?id=1` must not reach the database,
+            // where PostgreSQL rejects it and aborts the request's transaction.
+            if (is_string($candidate) && \Illuminate\Support\Str::isUuid($candidate)) {
                 return $candidate;
             }
         }
