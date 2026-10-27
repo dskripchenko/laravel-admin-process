@@ -57,7 +57,7 @@ class ProcessInstanceScreen extends Screen
     {
         $view = $this->view();
 
-        return $view === null ? __('Экземпляр процесса') : $view->process().' · '.($view->businessKey() ?? $view->id());
+        return $view === null ? __('Экземпляр процесса') : ($view->definition()->root->label() ?? $view->process()).' · '.($view->businessKey() ?? substr($view->id(), 0, 8));
     }
 
     public function description(): ?string
@@ -130,7 +130,7 @@ class ProcessInstanceScreen extends Screen
             ], $view->incidents(null)),
             'batches' => array_map(fn (BatchRecord $b) => [
                 'id' => $b->id,
-                'state' => $b->state,
+                'state' => self::stateLabel($view, $b->state),
                 'status' => $b->status,
                 'progress' => self::progress($b),
                 'error' => $b->error === null ? null : ($b->error['code'] ?? '').': '.($b->error['message'] ?? ''),
@@ -612,6 +612,14 @@ class ProcessInstanceScreen extends Screen
         return $options;
     }
 
+    /** A state by its label, its id when it has none. */
+    private static function stateLabel(InstanceView $view, string $state): string
+    {
+        $definition = $view->definition();
+
+        return $definition->has($state) ? ($definition->node($state)->label() ?? $state) : $state;
+    }
+
     private static function progress(BatchRecord $batch): string
     {
         $s = $batch->summary();
@@ -638,7 +646,7 @@ class ProcessInstanceScreen extends Screen
         foreach (array_reverse($view->batches()) as $batch) {
             foreach (['failed', 'deferred'] as $status) {
                 foreach ($engine->batchItems($batch->id, $status, 200 - count($rows)) as $item) {
-                    $rows[] = ['state' => $batch->state, 'key' => $item->key, 'status' => $item->status, 'attempts' => $item->attempts, 'reason' => $item->reason];
+                    $rows[] = ['state' => self::stateLabel($view, $batch->state), 'key' => $item->key, 'status' => $item->status, 'attempts' => $item->attempts, 'reason' => $item->reason];
                 }
                 if (count($rows) >= 200) {
                     return $rows;
