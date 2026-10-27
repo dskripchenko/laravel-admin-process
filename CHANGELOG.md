@@ -5,8 +5,7 @@ All notable changes to this project are documented here. The format follows
 adheres to [Semantic Versioning](https://semver.org/).
 
 
-## [Unreleased]
-
+## [1.0.1] - 2026-10-27
 ### Fixed
 - **The instance page took another screen's `?id=1` for an instance id.** The
   panel describes every screen while it builds its manifest, with the query
