@@ -40,6 +40,8 @@ them — that is all the setup there is.
 | `admin.process.incidents.view` | the incident list |
 | `admin.process.operate` | suspend, resume, cancel, retry a failed effect, resolve an incident, redeliver an event |
 | `admin.process.manage` | move to a state, edit the context, settle or skip an effect, retry an effect whose outcome is unknown |
+| `admin.process.switches` | switch stages of a pipeline off and on from the process diagram |
+| `admin.process.start` | start the processes listed in `admin-process.startable` by hand |
 
 Every operator action asks for a reason; the reason and the admin go into
 the instance's journal.

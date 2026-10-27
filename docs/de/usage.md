@@ -47,6 +47,45 @@ Tabs:
 | **Incidents** | Incidents und die Events, die warten oder abgelehnt wurden. |
 | **Journal** | die neuesten Einträge, neueste zuerst: was passiert ist, wer, warum. |
 
+## Prozesse und ihre Diagramme
+
+**Processes** listet die neueste Version jedes Prozesses mit der Anzahl der
+Instanzen, die laufen, an einem Incident warten und am letzten Tag
+fehlgeschlagen sind. Eine Zeile öffnet die Prozessseite,
+`/admin/screens/process-definition?name=<process>`:
+
+- **Diagram** – der gesamte Prozess mit der Anzahl der Instanzen in jedem
+  Zustand. Abschaltbare Stufen tragen einen Schalter an ihrem Knoten: Ihn
+  auszuschalten (Berechtigung `admin.process.switches`) schaltet die Stufe
+  überall ab, und Instanzen, die in ihr stehen, verlassen sie.
+- **Stages** – alle abschaltbaren Stufen: an oder aus, warum, wer und wann;
+  eine automatische Abschaltung zeigt die Fehlermeldung und das System als
+  Akteur.
+- **Instances** – die neuesten zwanzig, jede ein Link auf ihre Seite.
+- **Start** (Berechtigung `admin.process.start`) – für Prozesse, die in
+  `admin-process.startable` aufgeführt sind: der Startkontext als JSON und
+  die Stufen, die für diesen Lauf abgeschaltet werden. Die Seite der neuen
+  Instanz öffnet sich.
+
+```php
+// config/admin-process.php
+'startable' => [
+    OsmHazards::class,                         // starts with an empty context
+    GarUpdate::class => ['regions' => []],     // the form opens with this context
+],
+```
+
+## Batches auf der Instanzseite
+
+Der Tab **Batches** listet die Batch-Stufen der Instanz – Status, Elemente
+`finished / total` mit den Zählern, ein Fehler – sowie die fehlgeschlagenen
+und zurückgestellten Elemente mit ihrer Begründung und ihren Versuchen. Das
+Diagramm zeigt den Fortschritt eines laufenden Batches an seinem Knoten.
+Zwei Operator-Aktionen (Berechtigung `admin.process.operate`, mit einer
+Begründung): **Retry batch elements** (fehlgeschlagene, zurückgestellte oder
+nicht gefundene Elemente eines laufenden Batches) und **Skip the rest of the
+batch**.
+
 ## Operator-Aktionen
 
 Die Befehlsleiste der Seite. Jede Aktion verlangt eine Begründung, die
@@ -64,6 +103,8 @@ zusammen mit dem Admin ins Journal geht.
 | Edit context | manage | `patchContext` – ein JSON-Objekt `{"key": value}` setzt Keys der obersten Ebene; ein JSON-Patch-Array (RFC 6902) erledigt alles andere |
 | Settle an effect | manage | `resolveEffect` – erfolgreich mit einem Ergebnis oder fehlgeschlagen mit einem Code |
 | Skip effect | manage | `skipEffect` – fortfahren, als wäre er erfolgreich gewesen |
+| Retry batch elements | operate | `retryBatchItems` – fehlgeschlagene, zurückgestellte oder nicht gefundene Elemente eines laufenden Batches zurück in seine Warteschlange |
+| Skip the rest of the batch | operate | `skipBatch` – was wartet, wird übersprungen, der Zustand geht weiter |
 
 Im Diagramm hat die Seitenleiste eines ausgewählten Zustands **Move to this
 state** (manage), mit Bestätigung.

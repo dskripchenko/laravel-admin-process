@@ -45,6 +45,40 @@ Tabs:
 | **Incidents** | incidents and the events that wait or were rejected. |
 | **Journal** | the latest entries, newest first: what happened, who, why. |
 
+## Processes and their diagrams
+
+**Processes** lists the latest version of each process with how many instances
+run, wait on an incident and failed in the last day. A row opens the process page,
+`/admin/screens/process-definition?name=<process>`:
+
+- **Diagram** — the whole process with the number of instances in each state.
+  Switchable stages carry a switch on their node: turning it off (permission
+  `admin.process.switches`) switches the stage off everywhere, and instances
+  standing in it leave it.
+- **Stages** — every switchable stage: on or off, why, who and when; an automatic
+  switch-off shows the error's message and the system as the actor.
+- **Instances** — the latest twenty, each a link to its page.
+- **Start** (permission `admin.process.start`) — for processes listed in
+  `admin-process.startable`: the start context as JSON and the stages to switch
+  off for this run. The new instance's page opens.
+
+```php
+// config/admin-process.php
+'startable' => [
+    OsmHazards::class,                         // starts with an empty context
+    GarUpdate::class => ['regions' => []],     // the form opens with this context
+],
+```
+
+## Batches on the instance page
+
+The **Batches** tab lists the batch stages of the instance — status, elements
+`finished / total` with the counters, an error — and the failed and deferred
+elements with their reason and attempts. The diagram shows the progress of a
+running batch on its node. Two operator actions (permission
+`admin.process.operate`, with a reason): **Retry batch elements** (failed,
+deferred or not found ones of a running batch) and **Skip the rest of the batch**.
+
 ## Operator actions
 
 The page's command bar. Each asks for a reason, which goes into the journal
@@ -62,6 +96,8 @@ together with the admin.
 | Edit context | manage | `patchContext` — a JSON object `{"key": value}` sets top-level keys; a JSON Patch array (RFC 6902) does anything else |
 | Settle an effect | manage | `resolveEffect` — succeeded with a result, or failed with a code |
 | Skip effect | manage | `skipEffect` — continue as if it succeeded |
+| Retry batch elements | operate | `retryBatchItems` — failed, deferred or not found elements of a running batch back into its queue |
+| Skip the rest of the batch | operate | `skipBatch` — what waits is skipped, the state goes on |
 
 On the diagram, the drawer of a selected state has **Move to this state**
 (manage), with a confirmation.

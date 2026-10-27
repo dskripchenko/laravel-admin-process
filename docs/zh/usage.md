@@ -41,6 +41,37 @@ incident、创建时间和更新时间。当前状态节点是活动的叶子状
 | **Incidents** | incident，以及正在等待或已被拒绝的事件。 |
 | **Journal** | 最新的日志条目，按从新到旧排列：发生了什么、谁、为什么。 |
 
+## 流程及其流程图
+
+**Processes** 列出每个流程的最新版本，以及正在运行、因 incident 而等待和最近一天内
+失败的实例数。点击一行会打开流程页面 `/admin/screens/process-definition?name=<process>`：
+
+- **Diagram**——整个流程，以及每个状态中的实例数。可关闭的阶段在其节点上带有开关：
+  关闭它（需要 `admin.process.switches` 权限）会在所有地方关闭该阶段，停留在其中的
+  实例会离开它。
+- **Stages**——所有可关闭的阶段：开启或关闭、原因、操作者和时间；自动关闭时显示错误
+  消息，并以系统作为操作者。
+- **Instances**——最新的二十个实例，每个都链接到其页面。
+- **Start**（需要 `admin.process.start` 权限）——用于 `admin-process.startable` 中
+  列出的流程：以 JSON 形式填写启动上下文，并选择本次运行要关闭的阶段。随后会打开新
+  实例的页面。
+
+```php
+// config/admin-process.php
+'startable' => [
+    OsmHazards::class,                         // starts with an empty context
+    GarUpdate::class => ['regions' => []],     // the form opens with this context
+],
+```
+
+## 实例页面上的批次
+
+**Batches** 标签页列出实例的批次阶段——状态、`finished / total` 形式的元素数及各项
+计数、错误——以及失败和延后的元素及其原因和尝试次数。流程图在正在运行的批次的节点上
+显示其进度。两个运维操作（需要 `admin.process.operate` 权限，并填写原因）：
+**Retry batch elements**（正在运行的批次中失败、延后或未找到的元素）和
+**Skip the rest of the batch**。
+
 ## 运维操作
 
 页面的命令栏。每个操作都要求填写原因，原因与管理员一起写入日志。
@@ -57,6 +88,8 @@ incident、创建时间和更新时间。当前状态节点是活动的叶子状
 | Edit context | manage | `patchContext`——JSON 对象 `{"key": value}` 设置顶层键；JSON Patch 数组（RFC 6902）可完成其他任何修改 |
 | Settle an effect | manage | `resolveEffect`——以某个结果标记为成功，或以某个错误码标记为失败 |
 | Skip effect | manage | `skipEffect`——按成功处理并继续 |
+| Retry batch elements | operate | `retryBatchItems`——把正在运行的批次中失败、延后或未找到的元素放回其队列 |
+| Skip the rest of the batch | operate | `skipBatch`——跳过仍在等待的部分，状态继续推进 |
 
 在流程图上，选中状态的抽屉面板中有 **Move to this state**（manage），需要确认。
 

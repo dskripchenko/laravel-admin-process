@@ -40,6 +40,8 @@ die Rollen, die sie brauchen – mehr Einrichtung gibt es nicht.
 | `admin.process.incidents.view` | die Incident-Liste |
 | `admin.process.operate` | anhalten, fortsetzen, abbrechen, einen fehlgeschlagenen Effekt wiederholen, einen Incident auflösen, ein Event erneut zustellen |
 | `admin.process.manage` | in einen Zustand versetzen, den Kontext bearbeiten, einen Effekt abschließen oder überspringen, einen Effekt mit unbekanntem Ausgang wiederholen |
+| `admin.process.switches` | Stufen einer Pipeline im Prozessdiagramm aus- und einschalten |
+| `admin.process.start` | die in `admin-process.startable` aufgeführten Prozesse von Hand starten |
 
 Jede Operator-Aktion verlangt eine Begründung; Begründung und Admin
 landen im Journal der Instanz.
