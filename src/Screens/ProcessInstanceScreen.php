@@ -82,7 +82,7 @@ class ProcessInstanceScreen extends Screen
         $label = $view->label();
         $why = $view->why();
 
-        return [
+        return self::flatten([
             'instance_id' => $view->id(),
             'found' => true,
             'summary' => [
@@ -158,7 +158,7 @@ class ProcessInstanceScreen extends Screen
                 'reason' => $j->reason,
                 'summary' => self::describe($j),
             ], self::tail($view)),
-        ];
+        ]);
     }
 
     public function layout(): array
@@ -170,15 +170,15 @@ class ProcessInstanceScreen extends Screen
 
         return [
             Layout::infolist([
-                BadgeEntry::make('summary.status')->label(__('Статус'))->colors(Labels::statusColors())->labels(Labels::statuses()),
-                TextEntry::make('summary.states')->label(__('Состояние')),
-                TextEntry::make('summary.label')->label(__('Этап')),
-                TextEntry::make('summary.business_key')->label(__('Бизнес-ключ'))->copyable(),
-                TextEntry::make('summary.subject')->label(__('Объект')),
-                TextEntry::make('summary.parent')->label(__('Родитель'))->copyable(),
-                TextEntry::make('summary.created_at')->label(__('Создан'))->asDateTime(),
-                TextEntry::make('summary.updated_at')->label(__('Изменён'))->asDateTime(),
-                TextEntry::make('summary.why')->label(__('Последний шаг')),
+                BadgeEntry::make('summary_status')->label(__('Статус'))->colors(Labels::statusColors())->labels(Labels::statuses()),
+                TextEntry::make('summary_states')->label(__('Состояние')),
+                TextEntry::make('summary_label')->label(__('Этап')),
+                TextEntry::make('summary_business_key')->label(__('Бизнес-ключ'))->copyable(),
+                TextEntry::make('summary_subject')->label(__('Объект')),
+                TextEntry::make('summary_parent')->label(__('Родитель'))->copyable(),
+                TextEntry::make('summary_created_at')->label(__('Создан'))->asDateTime(),
+                TextEntry::make('summary_updated_at')->label(__('Изменён'))->asDateTime(),
+                TextEntry::make('summary_why')->label(__('Последний шаг')),
             ])->layout('grid'),
             Layout::tabs([
                 __('Схема') => [
@@ -336,6 +336,22 @@ class ProcessInstanceScreen extends Screen
                     $reason(),
                 ]),
         ];
+    }
+
+    /**
+     * The summary also as flat keys (`summary_status`): an entry of the
+     * infolist reads a top-level key of the state, not a dotted path.
+     *
+     * @param  array<string, mixed>  $state
+     * @return array<string, mixed>
+     */
+    public static function flatten(array $state): array
+    {
+        foreach ((array) ($state['summary'] ?? []) as $key => $value) {
+            $state['summary_'.$key] = $value;
+        }
+
+        return $state;
     }
 
     // The flow ----------------------------------------------------------------
