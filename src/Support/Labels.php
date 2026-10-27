@@ -85,6 +85,26 @@ final class Labels
      * The address of the instance page in the panel, with an `{id}`
      * placeholder for a list's link template.
      */
+    /**
+     * @return array<string, string>
+     */
+    public static function batchStatuses(): array
+    {
+        return [
+            'running' => __('идёт'),
+            'done' => __('завершён'),
+            'failed' => __('остановлен с ошибкой'),
+            'cancelled' => __('отменён'),
+        ];
+    }
+
+    public static function definitionUrl(string $name = '{name}'): string
+    {
+        $path = trim((string) config('admin.path', 'admin'), '/');
+
+        return ($path === '' ? '' : '/'.$path).'/screens/process-definition?name='.$name;
+    }
+
     public static function instanceUrl(string $id = '{id}'): string
     {
         $path = trim((string) config('admin.path', 'admin'), '/');

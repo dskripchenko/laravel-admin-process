@@ -38,6 +38,8 @@ Provider 会自动注册。把权限授予需要它们的角色——这就是�
 | `admin.process.incidents.view` | incident 列表 |
 | `admin.process.operate` | 暂停、恢复、取消、重试失败的 effect、关闭 incident、重新投递事件 |
 | `admin.process.manage` | 转移到某个状态、编辑上下文、设定或跳过 effect、重试结果未知的 effect |
+| `admin.process.switches` | 在流程图上关闭和开启流水线的阶段 |
+| `admin.process.start` | 手动启动 `admin-process.startable` 中列出的流程 |
 
 每个运维操作都要求填写原因；原因和操作的管理员会写入实例日志。
 

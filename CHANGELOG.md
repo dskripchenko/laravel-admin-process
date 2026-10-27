@@ -5,6 +5,22 @@ All notable changes to this project are documented here. The format follows
 adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [1.1.0] - 2026-10-27
+
+### Added
+- **Processes**: the latest version of each process with running, with-incident
+  and failed-in-a-day counts.
+- **The process page** (`/screens/process-definition?name=`): the diagram with
+  instances per state, switches of switchable stages on the nodes
+  (`admin.process.switches`), the list of stages with who switched them off and
+  why, the latest instances, and a start form for processes listed in
+  `admin-process.startable` (`admin.process.start`), with stages switched off for
+  that run.
+- **Batches on the instance page**: batch stages with their counters, failed and
+  deferred elements, the actions «Retry batch elements» and «Skip the rest of the
+  batch»; the progress of a running batch on its diagram node.
+- Requires `dskripchenko/laravel-process-engine` ^1.1.
+
 ## [1.0.1] - 2026-10-27
 ### Fixed
 - **The instance page took another screen's `?id=1` for an instance id.** The

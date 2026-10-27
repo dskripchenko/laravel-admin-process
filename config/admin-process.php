@@ -24,4 +24,15 @@ return [
     | How many latest journal entries the instance page shows.
     */
     'journal_limit' => 200,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Processes started by hand
+    |--------------------------------------------------------------------------
+    | Process classes the diagram page may start (permission
+    | admin.process.start): Class::class, or Class::class => [the context the
+    | start form opens with]. Stages of switchable states can be switched off
+    | for that one run.
+    */
+    'startable' => [],
 ];
