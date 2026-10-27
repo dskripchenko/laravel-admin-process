@@ -57,7 +57,7 @@ class ProcessInstanceScreen extends Screen
     {
         $view = $this->view();
 
-        return $view === null ? __('Экземпляр процесса') : $view->process().' · '.($view->businessKey() ?? $view->id());
+        return $view === null ? __('Экземпляр процесса') : ($view->definition()->root->label() ?? $view->process()).' · '.($view->businessKey() ?? substr($view->id(), 0, 8));
     }
 
     public function description(): ?string
@@ -82,7 +82,7 @@ class ProcessInstanceScreen extends Screen
         $label = $view->label();
         $why = $view->why();
 
-        return [
+        return self::flatten([
             'instance_id' => $view->id(),
             'found' => true,
             'summary' => [
@@ -130,7 +130,7 @@ class ProcessInstanceScreen extends Screen
             ], $view->incidents(null)),
             'batches' => array_map(fn (BatchRecord $b) => [
                 'id' => $b->id,
-                'state' => $b->state,
+                'state' => self::stateLabel($view, $b->state),
                 'status' => $b->status,
                 'progress' => self::progress($b),
                 'error' => $b->error === null ? null : ($b->error['code'] ?? '').': '.($b->error['message'] ?? ''),
@@ -158,7 +158,7 @@ class ProcessInstanceScreen extends Screen
                 'reason' => $j->reason,
                 'summary' => self::describe($j),
             ], self::tail($view)),
-        ];
+        ]);
     }
 
     public function layout(): array
@@ -170,15 +170,15 @@ class ProcessInstanceScreen extends Screen
 
         return [
             Layout::infolist([
-                BadgeEntry::make('summary.status')->label(__('Статус'))->colors(Labels::statusColors())->labels(Labels::statuses()),
-                TextEntry::make('summary.states')->label(__('Состояние')),
-                TextEntry::make('summary.label')->label(__('Этап')),
-                TextEntry::make('summary.business_key')->label(__('Бизнес-ключ'))->copyable(),
-                TextEntry::make('summary.subject')->label(__('Объект')),
-                TextEntry::make('summary.parent')->label(__('Родитель'))->copyable(),
-                TextEntry::make('summary.created_at')->label(__('Создан'))->asDateTime(),
-                TextEntry::make('summary.updated_at')->label(__('Изменён'))->asDateTime(),
-                TextEntry::make('summary.why')->label(__('Последний шаг')),
+                BadgeEntry::make('summary_status')->label(__('Статус'))->colors(Labels::statusColors())->labels(Labels::statuses()),
+                TextEntry::make('summary_states')->label(__('Состояние')),
+                TextEntry::make('summary_label')->label(__('Этап')),
+                TextEntry::make('summary_business_key')->label(__('Бизнес-ключ'))->copyable(),
+                TextEntry::make('summary_subject')->label(__('Объект')),
+                TextEntry::make('summary_parent')->label(__('Родитель'))->copyable(),
+                TextEntry::make('summary_created_at')->label(__('Создан'))->asDateTime(),
+                TextEntry::make('summary_updated_at')->label(__('Изменён'))->asDateTime(),
+                TextEntry::make('summary_why')->label(__('Последний шаг')),
             ])->layout('grid'),
             Layout::tabs([
                 __('Схема') => [
@@ -336,6 +336,22 @@ class ProcessInstanceScreen extends Screen
                     $reason(),
                 ]),
         ];
+    }
+
+    /**
+     * The summary also as flat keys (`summary_status`): an entry of the
+     * infolist reads a top-level key of the state, not a dotted path.
+     *
+     * @param  array<string, mixed>  $state
+     * @return array<string, mixed>
+     */
+    public static function flatten(array $state): array
+    {
+        foreach ((array) ($state['summary'] ?? []) as $key => $value) {
+            $state['summary_'.$key] = $value;
+        }
+
+        return $state;
     }
 
     // The flow ----------------------------------------------------------------
@@ -596,6 +612,14 @@ class ProcessInstanceScreen extends Screen
         return $options;
     }
 
+    /** A state by its label, its id when it has none. */
+    private static function stateLabel(InstanceView $view, string $state): string
+    {
+        $definition = $view->definition();
+
+        return $definition->has($state) ? ($definition->node($state)->label() ?? $state) : $state;
+    }
+
     private static function progress(BatchRecord $batch): string
     {
         $s = $batch->summary();
@@ -622,7 +646,7 @@ class ProcessInstanceScreen extends Screen
         foreach (array_reverse($view->batches()) as $batch) {
             foreach (['failed', 'deferred'] as $status) {
                 foreach ($engine->batchItems($batch->id, $status, 200 - count($rows)) as $item) {
-                    $rows[] = ['state' => $batch->state, 'key' => $item->key, 'status' => $item->status, 'attempts' => $item->attempts, 'reason' => $item->reason];
+                    $rows[] = ['state' => self::stateLabel($view, $batch->state), 'key' => $item->key, 'status' => $item->status, 'attempts' => $item->attempts, 'reason' => $item->reason];
                 }
                 if (count($rows) >= 200) {
                     return $rows;

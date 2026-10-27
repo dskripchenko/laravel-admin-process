@@ -20,6 +20,7 @@ final class InstanceScreenTest extends TestCase
 
         $this->assertSame($id, $response->json('payload.state.instance_id'));
         $this->assertSame('new', $response->json('payload.state.summary.states'));
+        $this->assertSame('new', $response->json('payload.state.summary_states'), 'an infolist entry reads a top-level key');
         $this->assertSame('New order', $response->json('payload.state.summary.label'));
         $this->assertSame(1, $response->json('payload.state.graph.version'));
         $this->assertContains('pay', array_column($response->json('payload.state.expects'), 'event'));

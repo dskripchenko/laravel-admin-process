@@ -50,14 +50,14 @@ class ProcessDefinitionScreen extends Screen
     {
         $record = $this->record();
 
-        return $record === null ? __('Процесс') : $record->name;
+        return $record === null ? __('Процесс') : ((new Definition($record->schema))->root->label() ?? $record->name);
     }
 
     public function description(): ?string
     {
         $record = $this->record();
 
-        return $record === null ? null : __('Версия :version', ['version' => $record->version]);
+        return $record === null ? null : $record->name.' · '.__('Версия :version', ['version' => $record->version]);
     }
 
     public function permission(): string
@@ -73,11 +73,11 @@ class ProcessDefinitionScreen extends Screen
         }
         $definition = new Definition($record->schema);
 
-        return [
+        return ProcessInstanceScreen::flatten([
             'definition_name' => $record->name,
             'found' => true,
             'summary' => [
-                'name' => $record->name,
+                'name' => $definition->root->label() ?? $record->name,
                 'version' => $record->version,
                 'running' => ProcessInstance::query()->where('definition_name', $record->name)->where('status', 'running')->count(),
                 'startable' => $this->processClass($record->name) !== null,
@@ -91,7 +91,7 @@ class ProcessDefinitionScreen extends Screen
                 'by' => $s['by'],
                 'at' => $s['at'],
             ], $this->switchRows($definition)),
-        ];
+        ]);
     }
 
     public function layout(): array
@@ -102,9 +102,9 @@ class ProcessDefinitionScreen extends Screen
 
         return [
             Layout::infolist([
-                TextEntry::make('summary.name')->label(__('Процесс')),
-                TextEntry::make('summary.version')->label(__('Версия')),
-                TextEntry::make('summary.running')->label(__('Идут')),
+                TextEntry::make('summary_name')->label(__('Процесс')),
+                TextEntry::make('summary_version')->label(__('Версия')),
+                TextEntry::make('summary_running')->label(__('Идут')),
             ])->layout('grid'),
             Layout::tabs([
                 __('Схема') => [

@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format follows
 adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [1.1.1] - 2026-10-27
+
+### Fixed
+- **The summary of the instance page and the process page was empty**: infolist
+  entries read a top-level key of the screen state, not a dotted path. The
+  summary also goes as `summary_<key>` now (`summary` stays).
+- The process and instance pages name the process and its batch stages by
+  their labels.
+
 ## [1.1.0] - 2026-10-27
 
 ### Added
