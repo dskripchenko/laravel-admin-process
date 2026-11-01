@@ -25,14 +25,18 @@
     "require": {
         "php": "^8.2",
         "dskripchenko/laravel-admin": "^1.59",
-        "dskripchenko/laravel-process-engine": "^1.1"
+        "dskripchenko/laravel-process-engine": "^1.2"
     },
     "require-dev": {
+        "dskripchenko/laravel-admin-health": "^1.5",
         "larastan/larastan": "^3.0",
         "laravel/pint": "^1.18",
         "orchestra/testbench": "^9.0 || ^10.0 || ^11.0",
         "phpstan/phpstan": "^2.0",
         "phpunit/phpunit": "^11.0 || ^12.0"
+    },
+    "suggest": {
+        "dskripchenko/laravel-admin-health": "The engine's health checks (incidents, unknown effects, overdue timers, standing queues) on its page"
     },
     "autoload": {
         "psr-4": {

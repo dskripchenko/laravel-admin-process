@@ -31,6 +31,7 @@ them — that is all the setup there is.
 | **Processes → Process incidents** | what needs a person, open first; resolve with a reason. |
 | **Instance page** (`/screens/process-instance?id=…`) | the diagram with the instance's position, polled live, with drill-down into compound states and child processes; what the instance waits for and its timers; the context; effects; incidents and stuck events; the journal. |
 | **Dashboard** | running and suspended instances, open incidents, overdue timers, stuck effects. |
+| **Health page** (with [laravel-admin-health](https://github.com/dskripchenko/laravel-admin-health)) | checks for open incidents, effects of unknown outcome, overdue timers and work the workers left standing. |
 
 ## Permissions
 

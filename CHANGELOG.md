@@ -5,6 +5,17 @@ All notable changes to this project are documented here. The format follows
 adheres to [Semantic Versioning](https://semver.org/).
 
 
+## [1.2.0] - 2026-11-01
+
+### Added
+- **Health checks** for dskripchenko/laravel-admin-health, registered when it
+  is installed (`suggest`): `process.incidents`, `process.unknown_effects`,
+  `process.timers`, `process.queues` — thresholds in `admin-process.health`.
+
+### Changed
+- Requires dskripchenko/laravel-process-engine ^1.2 (process-engine 1.3:
+  quorum joins, undoing late results, health counters).
+
 ## [1.1.1] - 2026-10-27
 
 ### Fixed

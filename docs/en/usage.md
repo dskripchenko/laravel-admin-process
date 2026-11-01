@@ -108,6 +108,20 @@ so a refusal (the effect is not failed, the instance is finished) shows as
 an error. With a real queue the panel reports the operation as accepted,
 and the outcome appears in the journal.
 
+## Health checks
+
+With [dskripchenko/laravel-admin-health](https://github.com/dskripchenko/laravel-admin-health)
+installed, the engine's checks join its page (category `processes`):
+
+| Check | Looks at | Thresholds (`admin-process.health`) |
+|---|---|---|
+| `process.incidents` | open incidents | warning from 1, failing from 10 |
+| `process.unknown_effects` | effects of unknown outcome | warning after 15 minutes, failing after 1 hour |
+| `process.timers` | overdue timers — the scheduler does not run | failing from 1 |
+| `process.queues` | events and due effects nobody takes up — the workers stand | warning after 5 minutes, failing after 15 |
+
+`admin-process.health.enabled => false` leaves them out.
+
 ## Security
 
 The page's methods are bound to actions with permissions, so the panel
