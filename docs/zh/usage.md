@@ -97,6 +97,20 @@ incident、创建时间和更新时间。当前状态节点是活动的叶子状
 因此拒绝（effect 并未失败、实例已结束）会显示为错误。使用真正的队列时，面板报告操作已被接受，
 结果会出现在日志中。
 
+## 健康检查
+
+安装 [dskripchenko/laravel-admin-health](https://github.com/dskripchenko/laravel-admin-health)
+后，引擎的检查会出现在其页面上（类别 `processes`）：
+
+| 检查 | 关注 | 阈值（`admin-process.health`） |
+|---|---|---|
+| `process.incidents` | 未关闭的事故 | 1 起警告，10 起失败 |
+| `process.unknown_effects` | 结果未知的副作用 | 15 分钟后警告，1 小时后失败 |
+| `process.timers` | 逾期的定时器——调度器未运行 | 1 个即失败 |
+| `process.queues` | 无人处理的事件和到期副作用——工作进程停滞 | 5 分钟后警告，15 分钟后失败 |
+
+`admin-process.health.enabled => false` 关闭这些检查。
+
 ## 安全
 
 页面的方法绑定到带权限的操作上，因此即使通过 API 直接调用，面板也会拒绝没有相应权限的用户

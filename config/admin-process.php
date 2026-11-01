@@ -35,4 +35,23 @@ return [
     | for that one run.
     */
     'startable' => [],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Health checks (with dskripchenko/laravel-admin-health installed)
+    |--------------------------------------------------------------------------
+    | process.incidents — open incidents: warning from `warning`, failing from
+    | `failing`. process.unknown_effects — effects of unknown outcome older
+    | than `warning_after` / `failing_after`. process.timers — overdue timers
+    | (the scheduler does not run). process.queues — events and due effects
+    | waiting longer than `warning_after` / `failing_after` (the workers
+    | stand). Each also takes `frequency` (1m, 5m, 15m, 1h) and `timeout`.
+    */
+    'health' => [
+        'enabled' => true,
+        'incidents' => ['warning' => 1, 'failing' => 10],
+        'unknown_effects' => ['warning_after' => '15 minutes', 'failing_after' => '1 hour'],
+        'timers' => ['failing' => 1],
+        'queues' => ['warning_after' => '5 minutes', 'failing_after' => '15 minutes'],
+    ],
 ];

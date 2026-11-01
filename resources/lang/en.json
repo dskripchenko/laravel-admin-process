@@ -175,5 +175,20 @@
     "остановлен с ошибкой": "stopped with an error",
     "отменён": "cancelled",
     "Нет права выключать этапы": "No permission to switch stages off",
-    "Нет права запускать процессы": "No permission to start processes"
+    "Нет права запускать процессы": "No permission to start processes",
+    "Процессы: открытые инциденты": "Processes: open incidents",
+    "Процессы: эффекты с неизвестным исходом": "Processes: effects of unknown outcome",
+    "Процессы: просроченные таймеры": "Processes: overdue timers",
+    "Процессы: необработанные события и эффекты": "Processes: events and effects nobody takes up",
+    "Не удалось проверить процессы: :message": "Could not check the processes: :message",
+    "Открытых инцидентов: :count — разберите их в разделе «Инциденты процессов»": "Open incidents: :count — resolve them under Process incidents",
+    "Открытых инцидентов нет": "No open incidents",
+    "Хранилище процессов не считает эффекты с неизвестным исходом": "The process store does not count effects of unknown outcome",
+    "Эффектов с неизвестным исходом дольше :age: :count": "Effects of unknown outcome for longer than :age: :count",
+    "Эффектов с неизвестным исходом нет": "No effects of unknown outcome",
+    "Просроченных таймеров: :count — запущен ли планировщик (process-engine:tick)?": "Overdue timers: :count — is the scheduler (process-engine:tick) running?",
+    "Таймеры срабатывают вовремя": "Timers fire on time",
+    "Хранилище процессов не считает необработанные события": "The process store does not count waiting events",
+    "Событий и эффектов, ждущих дольше :age: :count — работают ли воркеры очереди?": "Events and effects waiting longer than :age: :count — are the queue workers running?",
+    "Очереди процессов разбираются": "The process queues are being worked off"
 }

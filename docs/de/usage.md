@@ -116,6 +116,20 @@ nicht fehlgeschlagen, die Instanz ist beendet) als Fehler erscheint. Mit
 einer echten Queue meldet das Panel die Operation als angenommen, und das
 Ergebnis erscheint im Journal.
 
+## Health-Checks
+
+Ist [dskripchenko/laravel-admin-health](https://github.com/dskripchenko/laravel-admin-health)
+installiert, erscheinen die Checks der Engine auf dessen Seite (Kategorie `processes`):
+
+| Check | Betrachtet | Schwellen (`admin-process.health`) |
+|---|---|---|
+| `process.incidents` | offene Incidents | Warnung ab 1, Fehler ab 10 |
+| `process.unknown_effects` | Effekte mit unbekanntem Ausgang | Warnung nach 15 Minuten, Fehler nach 1 Stunde |
+| `process.timers` | überfällige Timer — der Scheduler läuft nicht | Fehler ab 1 |
+| `process.queues` | Ereignisse und fällige Effekte, die niemand aufnimmt — die Worker stehen | Warnung nach 5 Minuten, Fehler nach 15 |
+
+`admin-process.health.enabled => false` lässt sie weg.
+
 ## Sicherheit
 
 Die Methoden der Seite sind an Aktionen mit Berechtigungen gebunden, daher
